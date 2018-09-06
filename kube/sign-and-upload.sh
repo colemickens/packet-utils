@@ -4,25 +4,35 @@ set -x
 set -euo pipefail
 
 key="/tmp/nix-cache.cluster.lol-1-secret"
-store_dir=/tmp/nixcache
-store_dir=/tmp/tmp.e0AzRg4ClL
-store="file://${store_dir}"
-derivation="$(readlink -f /nix/var/nix/profiles/system)"
+azkey="$(cat /tmp/kixstorage-secret)"
 
-mkdir -p "${store_dir}"
-#nix copy --to "${store}" "${derivation}"
+# build cache
 
-#nix sign-paths --store "${store}" -k "${key}" "${derivation}" -r
+mkdir -p "/tmp/nixcache"
+nix copy --to 'file:///tmp/nixcache' '/run/current-system'
+nix sign-paths \
+  --store 'file:///tmp/nixcache' -k "${key}" '/run/current-system' -r
 
-# upload to azure now
-docker run \
-  --net=host \
-  --env AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=kixstorage;AccountKey=PMAU4DVs9wYdST3JKYKr4KqS6DxoJKyWKBf0ATRxe9RBAj9CSWmu6bVMI1LMyLF05NROF68x4nMvhfpQNqLJ1w==;EndpointSuffix=core.windows.net" \
-  --volume "${store_dir}:/nix-cache:ro" \
-    docker.io/microsoft/azure-cli \
-      az storage blob upload-batch \
-        --if-none-match '*' \
-        --source /nix-cache \
-        --destination nixcache \
+# upload
 
-#-it    docker.io/microsoft/azure-cli /bin/bash
+function az() {
+  docker run \
+    --net=host \
+    --env AZURE_STORAGE_CONNECTION_STRING="${azkey}" \
+    --volume "${store_dir}:/nixcache:ro" \
+      docker.io/microsoft/azure-cli az $@
+}
+
+az storage blob container delete --name nixcache
+
+az storage blob container create --help
+
+az storage blob container create \
+  -name nixcache \
+  --public-access container
+
+az storage blob upload-batch \
+  --if-none-match '*' \
+  --source /nixcache \
+  --destination nixcache \
+

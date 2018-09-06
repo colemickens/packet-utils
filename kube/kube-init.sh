@@ -21,6 +21,12 @@ fi
 mv /etc/nixos/configuration.nix "/etc/nixos/configuration-backup-$(date '+%s').nix"
 ln -s /etc/packet-utils/kube/configuration.nix /etc/nixos/configuration.nix
 
+cat <<EOF >/root/.gitconfig
+[user]
+  email = cole.mickens@gmail.com
+  name = Cole Mickens
+EOF
+
 export NIX_PATH=nixpkgs=/etc/nixpkgs:nixos-config=/etc/nixos/configuration.nix
 nixos-rebuild switch \
   --option extra-binary-caches \

@@ -3,7 +3,7 @@
 set -x
 set -euo pipefail
 
-key="/etc/nixos/secrets/nix-cache.cluster.lol-1-secret"
+key="/tmp/nix-cache.cluster.lol-1-secret"
 store_dir=/tmp/nixcache
 store_dir=/tmp/tmp.e0AzRg4ClL
 store="file://${store_dir}"

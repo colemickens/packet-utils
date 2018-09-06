@@ -3,7 +3,7 @@
 
 {
   imports = [
-    ./packet.nix
+    /etc/nixos/packet.nix
   ];
 
   networking.firewall.enable = false;

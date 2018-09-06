@@ -8,5 +8,5 @@ scp \
   ~/NIX_SIGNING_KEY/nix-cache.cluster.lol-1-secret \
     root@kix.cluster.lol:/tmp/
 
-ssh root@kix.cluster.lol -t "/etc/nixos/kube-init.sh"
+ssh root@kix.cluster.lol -t "/tmp/kube-init.sh"
 

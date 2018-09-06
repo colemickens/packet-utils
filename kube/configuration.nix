@@ -6,6 +6,8 @@
     ./packet.nix
   ];
 
+  networking.firewall.enable = false;
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -26,9 +28,21 @@
     };
   };
 
-  nix.nixPath = [
-    "nixpkgs=/etc/nixpkgs:nixos-configuration=/etc/nixos/configuration.nix"
-  ];
+  nix = {
+    trustedBinaryCaches = [
+      https://kixstorage.blob.core.windows.net/nixcache
+      https://cache.nixos.org
+      https://hydra.nixos.org
+    ];
+    binaryCachePublicKeys = [
+      "nix-cache.cluster.lol-1:Pa4IudNcMNF+S/CjNt5GmD8vVJBDf8mJDktXfPb33Ak="
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "hydra.nixos.org-1:CNHJZBh9K4tP3EKF6FkkgeVYsS3ohTl+oS0Qa8bezVs="
+    ];
+    nixPath = [
+      "nixpkgs=/etc/nixpkgs:nixos-config=/etc/nixos/configuration.nix"
+    ];
+  };
 
   environment.noXlibs = true;
   virtualisation = {
@@ -58,7 +72,7 @@
       easyCerts = true;
       apiserver.extraSANs = [ "kix.cluster.lol" ];
 
-      kubelet.extraOpts = "--fail-on-swap=false";
+      kubelet.extraOpts = "--fail-swap-on=false";
     };
   };
 }

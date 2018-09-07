@@ -19,20 +19,23 @@ function az() {
   docker run \
     --net=host \
     --env AZURE_STORAGE_CONNECTION_STRING="${azkey}" \
-    --volume "${store_dir}:/nixcache:ro" \
+    --volume "/tmp/nixcache:/nixcache:ro" \
       docker.io/microsoft/azure-cli az $@
 }
 
-az storage blob container delete --name nixcache
+if az storage container show --name nixcache; then
+  az storage container delete --name nixcache
+  sleep 60
+fi
 
-az storage blob container create --help
+az storage container create --help
 
-az storage blob container create \
-  -name nixcache \
+az storage container create \
+  --name nixcache \
   --public-access container
 
-az storage blob upload-batch \
-  --if-none-match '*' \
+time az storage blob upload-batch \
+  --if-none-match '\*' \
   --source /nixcache \
   --destination nixcache \
 

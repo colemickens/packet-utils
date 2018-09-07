@@ -9,5 +9,5 @@ scp \
   ~/NIX_SIGNING_KEY/kixstorage-secret \
     root@kix.cluster.lol:/tmp/
 
-ssh root@kix.cluster.lol -t "/tmp/kube-init.sh"
+ssh -A root@kix.cluster.lol -t "/tmp/kube-init.sh"
 

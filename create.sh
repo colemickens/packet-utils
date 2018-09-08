@@ -5,9 +5,8 @@ set -x
 
 PACKET="/home/cole/code/PACKET_CLI/bin/packet"
 
-#HOSTNAME="epyc-$(date '+%Y%m%d-%H%M%S')"
 HOSTNAME="kix.cluster.lol"
-TERMINATION_TIME="$(date --date='5 hour' '+%s')"
+TERMINATION_TIME="$(date --date='8 hour' '+%s')"
 SPOT_PRICE_MAX="${SPOT_PRICE_MAX}"
 
 "${PACKET}" baremetal \

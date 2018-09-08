@@ -1,14 +1,33 @@
 #!/usr/bin/env bash
 
-function packet_device_list() {
+function device_list() {
+  set -xeuo pipefail
   curl \
-    -H 'APITOKEN: ${PACKET_API_TOKEN}'
+    -H "X-Auth-Token: ${PACKET_API_TOKEN}"
     http://packet.net/devices
 }
 
-function packet_device_create() {
+function device_create() {
+  set -xeuo pipefail
   curl \
-    -H 'APITOKEN: ${PACKET_API_TOKEN}'
-    http://packet.net/devices
+    -X PUT \
+    -H "X-Auth-Token: ${PACKET_API_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${2}" \
+    "https://api.packet.net/projects/${PACKET_PROJECT_ID}/devices"
 }
+
+function device_update() {
+  set -xeuo pipefail
+  curl \
+    -X PUT \
+    -H "X-Auth-Token: ${PACKET_API_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${2}" \
+    "https://api.packet.net/devices/${1}"
+}
+
+cmd="$1"
+shift
+"$cmd" "$@"
 

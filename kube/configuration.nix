@@ -6,6 +6,11 @@
     /etc/nixos/packet.nix
   ];
 
+  # TODO: shouldn't be needed
+  environment.systemPackages = with pkgs; [
+    kata-runtime
+  ];
+
   networking.firewall.enable = false;
 
   # Use the systemd-boot EFI boot loader.
@@ -48,9 +53,9 @@
   virtualisation = {
     # TODO: these should be "triggered" by the module+options below
     # containerd
-    #containerd.enable = true;
+    containerd.enable = true;
     # kata
-    #kata-runtime.enable = true;
+    kata-runtime.enable = true;
     #kata-ksm-throttler.enable = true;
     #kata-vc-throttler.enable = true;
   };

@@ -6,11 +6,6 @@
     /etc/nixos/packet.nix
   ];
 
-  # TODO: shouldn't be needed
-  environment.systemPackages = with pkgs; [
-    kata-runtime
-  ];
-
   networking.firewall.enable = false;
 
   # Use the systemd-boot EFI boot loader.
@@ -56,8 +51,6 @@
     containerd.enable = true;
     # kata
     kata-runtime.enable = true;
-    #kata-ksm-throttler.enable = true;
-    #kata-vc-throttler.enable = true;
   };
 
   services = {
@@ -77,7 +70,7 @@
       easyCerts = true;
       apiserver.extraSANs = [ "kix.cluster.lol" ];
 
-      kubelet.extraOpts = "--fail-swap-on=false";
+      kubelet.extraOpts = "--fail-swap-on=false"; # TODO: add the container runtime flag(s)
     };
   };
 }

@@ -10,13 +10,13 @@ if [[ ! -d /etc/nixpkgs ]]; then
   git clone https://github.com/colemickens/nixpkgs /etc/nixpkgs
   cd /etc/nixpkgs
   git checkout kata
-  git remote --set-url origin "https://github.com/colemickens/nixpkgs.git"
+  git remote set-url origin "git@github.com:colemickens/nixpkgs.git"
 fi
 
 if [[ ! -d /etc/packet-utils ]]; then
-  git clone git@github.com:colemickens/packet-utils /etc/packet-utils
+  git clone https://github.com/colemickens/packet-utils /etc/packet-utils
   cd /etc/packet-utils
-  git remote --set-url origin "https://github.com/colemickens/packet-utils.git"
+  git remote set-url origin "git@github.com:colemickens/packet-utils.git"
 fi
 
 mv /etc/nixos/configuration.nix "/etc/nixos/configuration-backup-$(date '+%s').nix"

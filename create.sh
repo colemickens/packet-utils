@@ -5,9 +5,11 @@ set -x
 
 PACKET="/home/cole/code/PACKET_CLI/bin/packet"
 
-HOSTNAME="kix.cluster.lol"
-TERMINATION_TIME="$(date --date='8 hour' '+%s')"
+HOSTNAME="${HOSTNAME:-kix.cluster.lol}"
+
 SPOT_PRICE_MAX="${SPOT_PRICE_MAX}"
+HOURS="${HOURS}"
+TERMINATION_TIME="$(date --date="${HOURS} hour" '+%s')"
 
 "${PACKET}" baremetal \
   create-device \

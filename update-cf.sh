@@ -21,7 +21,12 @@ IP=1.2.3.4
 # packet
 PACKET="/home/cole/code/PACKET_CLI/bin/packet"
 IP="$("${PACKET}" baremetal list-devices \
-  | jq -r ".[] | select(.hostname=\"${RECORD}.${DOMAIN}\").ip_addresses[] | select((.cidr==31) and (.public==true)).address")"
+  | jq -r ".[] | select(.hostname=\"${RECORD}.${DOMAIN}\").ip_addresses[] | select((.address_family==4) and (.public==true)).address")"
+
+if [[ -z "${IP}" ]]; then
+  echo "not ready yet" &>2
+  exit -1
+fi
 
 cfcli rm "${RECORD}" || true
 cfcli add --type "A" "${RECORD}" "${IP}" --ttl 120

@@ -11,12 +11,11 @@ function cfcli() {
   --domain "${DOMAIN}" \
   $@
 }
-TOKEN="$(cat /etc/nixos/secrets/cf-token)"
-EMAIL="$(cat /etc/nixos/secrets/cf-email)"
+TOKEN="${CFTOKEN:-"$(cat /etc/nixos/secrets/cf-token)"}"
+EMAIL="${CFEMAIL:-"$(cat /etc/nixos/secrets/cf-email)"}"
 
-DOMAIN="cluster.lol"
-RECORD="kix"
-IP=1.2.3.4
+DOMAIN="${DOMAIN:-"cluster.lol"}"
+RECORD="${RECORD:-"kix"}"
 
 # packet
 PACKET="/home/cole/code/PACKET_CLI/bin/packet"
@@ -30,4 +29,3 @@ fi
 
 cfcli rm "${RECORD}" || true
 cfcli add --type "A" "${RECORD}" "${IP}" --ttl 120
-

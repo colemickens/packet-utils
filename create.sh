@@ -9,21 +9,25 @@ set -x
 PACKET="/home/cole/code/PACKET_CLI/bin/packet"
 
 # Hostname of the Packet device
-HOSTNAME="${HOSTNAME:-kix.cluster.lol}"
+export DEVICENAME="${DEVICENAME:-"kix.cluster.lol"}"
 
 # Bid price for the spot market
-SPOT_PRICE_MAX="${SPOT_PRICE_MAX:-0.2}"
+export SPOT_PRICE_MAX="${SPOT_PRICE_MAX:-0.2}"
 
 # Number of hours the instance is configured to run for.
 # It is auto-terminated at this time, if not early due to
 # changes in the spot market.
 HOURS="${HOURS:-4}"
-TERMINATION_TIME="$(date --date="${HOURS} hour" '+%s')"
+export TERMINATION_TIME="${TERMINATION_TIME:-"$(date --date="${HOURS} hour" '+%s')"}"
 
 # Facility to deploy to.
-# (c2.medium.x86 are only available in ewr1/sjc1)
-FACILITY="${FACILITY:-"ewr1"}"
+export FACILITY="${FACILITY:-"sjc1"}"
 
+#cat vm.json | envsubst > "${f}" | ./lib/packet.sh device_create
+f="$(envsubst <vm.json)"
+./lib/packet.sh device_create "${f}"
+
+exit
 "${PACKET}" baremetal \
   create-device \
     --spot-instance \
@@ -32,4 +36,4 @@ FACILITY="${FACILITY:-"ewr1"}"
     --plan="c2.medium.x86" \
     --os-type="nixos_18_03" \
     --termination-time="${TERMINATION_TIME}" \
-    --hostname="${HOSTNAME}" \
+    --hostname="${DEVICENAME}" \

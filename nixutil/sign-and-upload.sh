@@ -3,8 +3,8 @@
 set -x
 set -euo pipefail
 
-key="/tmp/nix-cache.cluster.lol-1-secret"
-azkey="$(cat /tmp/kixstorage-secret)"
+key="/etc/nixos/secrets/nix-cache.cluster.lol-1-secret"
+azkey="$(cat /etc/nixos/secrets/kixstorage-secret)"
 
 # build cache
 

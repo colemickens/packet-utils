@@ -4,6 +4,9 @@ set -x
 set -euo pipefail
 
 # FOLLOW: https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md
+# requires patch: https://github.com/kubernetes-sigs/cri-tools/pull/383
+
+RUNTIME="kata"
 
 crictl stopp $(crictl pods -q)
 crictl rmp $(crictl pods -q)
@@ -42,7 +45,7 @@ EOF
 
 crictl pull "${image}"
 
-podid="$(crictl --debug runp "/tmp/pod-config.json")"
+podid="$(crictl --debug runp --runtime="${RUNTIME}" "/tmp/pod-config.json")"
 
 # TODO: why is pod-config repeated, and passed by id???
 containerid="$(crictl --debug create ${podid} /tmp/container-config.json /tmp/pod-config.json)"

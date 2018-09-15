@@ -3,10 +3,7 @@
 set -euo pipefail
 set -x
 
-# Until we move to curl based CLI, we need to
-# use Cole's patched CLI that has the termination_time
-# support.
-PACKET="/home/cole/code/PACKET_CLI/bin/packet"
+## Options
 
 # Hostname of the Packet device
 export DEVICENAME="${DEVICENAME:-"kix.cluster.lol"}"
@@ -23,17 +20,19 @@ export TERMINATION_TIME="${TERMINATION_TIME:-"$(date --date="${HOURS} hour" '+%s
 # Facility to deploy to.
 export FACILITY="${FACILITY:-"sjc1"}"
 
+# Spot instance or regular instance
+export TYPE="${TYPE:-"spot"}"
+
+## Implementation
+
 #cat vm.json | envsubst > "${f}" | ./lib/packet.sh device_create
-f="$(envsubst <vm.json)"
+if [ "${TYPE}" == "spot" ]; then
+  f="$(envsubst <vm-spot.json)"
+else
+  f="$(envsubst <vm.json)"
+fi
+
 ./lib/packet.sh device_create "${f}"
 
-exit
-"${PACKET}" baremetal \
-  create-device \
-    --spot-instance \
-    --spot-price-max="${SPOT_PRICE_MAX}" \
-    --facility="${FACILITY}" \
-    --plan="c2.medium.x86" \
-    --os-type="nixos_18_03" \
-    --termination-time="${TERMINATION_TIME}" \
-    --hostname="${DEVICENAME}" \
+# TODO: wait 10 seconds, update DNS record, and then poll until it is successfully deployed
+

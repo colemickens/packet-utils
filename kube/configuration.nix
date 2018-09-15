@@ -8,6 +8,8 @@
 
   networking.firewall.enable = false;
 
+  environment.systemPackages = with pkgs; [ cri-tools ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -40,7 +42,9 @@
       "hydra.nixos.org-1:CNHJZBh9K4tP3EKF6FkkgeVYsS3ohTl+oS0Qa8bezVs="
     ];
     nixPath = [
-      "nixpkgs=/etc/nixpkgs:nixos-config=/etc/nixos/configuration.nix"
+      "/etc/nixos"
+      "nixpkgs=/etc/nixpkgs"
+      "nixos-config=/etc/nixos/configuration.nix"
     ];
   };
 

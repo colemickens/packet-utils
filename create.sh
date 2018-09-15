@@ -14,8 +14,9 @@ export SPOT_PRICE_MAX="${SPOT_PRICE_MAX:-0.2}"
 # Number of hours the instance is configured to run for.
 # It is auto-terminated at this time, if not early due to
 # changes in the spot market.
+#export TERMINATION_TIME="${TERMINATION_TIME:-"$(date --date="${HOURS} hour" '+%s')"}"
 HOURS="${HOURS:-4}"
-export TERMINATION_TIME="${TERMINATION_TIME:-"$(date --date="${HOURS} hour" '+%s')"}"
+export TERMINATION_TIME="${TERMINATION_TIME:-"$(TZ=UTC date --date='+${HOURS} hour' --iso-8601=seconds)"}"
 
 # Facility to deploy to.
 export FACILITY="${FACILITY:-"sjc1"}"

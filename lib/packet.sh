@@ -7,6 +7,16 @@ function device_list() {
     "https://api.packet.net/projects/${PACKET_PROJECT_ID}/devices/"
 }
 
+function device_delete() {
+  set -xeuo pipefail
+  curl \
+    -X DELETE \
+    -H "X-Auth-Token: ${PACKET_API_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${1}" \
+    "https://api.packet.net/devices/${1}"
+}
+
 function device_create() {
   set -xeuo pipefail
   curl \

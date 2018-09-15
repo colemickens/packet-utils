@@ -4,6 +4,7 @@
   "operating_system": "nixos_18_03",
   "hostname": "${DEVICENAME}",
   "spot_instance": true,
-  "spot_price_max": ${SPOT_PRICE_MAX}
+  "spot_price_max": ${SPOT_PRICE_MAX},
+  "termination_time": "${TERMINATION_TIME}"
 }
 

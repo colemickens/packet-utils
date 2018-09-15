@@ -3,7 +3,7 @@
 set -x
 set -euo pipefail
 
-echo "PLAN=${1}"
+PLAN="${1}"
 
 # misc for dev only, remove later
 nix-env -iA nixos.gitAndTools.gitFull nixos.neovim nixos.htop nixos.psmisc nixos.tmux nixos.ripgrep
@@ -23,7 +23,7 @@ if [[ ! -d /etc/packet-utils ]]; then
   git remote set-url origin "git@github.com:colemickens/packet-utils.git"
 fi
 
-mv /etc/nixos/configuration.nix "/etc/nixos/configuration-backup-$(date '+%s').nix"
+mv /etc/nixos/configuration.nix "/etc/nixos/configuration-backup-$(date '+%s').nix" || true
 ln -s /etc/packet-utils/plans/${PLAN}/configuration.nix /etc/nixos/configuration.nix
 
 # TODO: remove (or find more elegant nix-y way to import my normal nixcfg, (which should actually be not that hard)

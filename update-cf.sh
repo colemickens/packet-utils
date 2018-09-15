@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-set -x
 
 # cloudflare
 function cfcli() {
@@ -13,19 +12,21 @@ function cfcli() {
 }
 TOKEN="${CFTOKEN:-"$(cat /etc/nixos/secrets/cf-token)"}"
 EMAIL="${CFEMAIL:-"$(cat /etc/nixos/secrets/cf-email)"}"
+DOMAIN="${DOMAIN:-"$(cat /etc/nixos/secrets/cf-domain)"}"
 
-DOMAIN="${DOMAIN:-"cluster.lol"}"
-RECORD="${RECORD:-"kix"}"
+DEVICES_OUT="$(./packet.sh device_list)"
+DEVICE_HOSTNAMES="$(echo "${DEVICES_OUT}" | jq -r ".[].hostname")"
 
-# packet
-PACKET="/home/cole/code/PACKET_CLI/bin/packet"
-IP="$("${PACKET}" baremetal list-devices \
-  | jq -r ".[] | select(.hostname=\"${RECORD}.${DOMAIN}\").ip_addresses[] | select((.address_family==4) and (.public==true)).address")"
+for RECORD in ${DEVICE_HOSTNAMES}; do
+  echo "----------------------------------------------------------------------------"
+  IP="$(echo "${DEVICES_OUT}" | jq -r ".[] | select(.hostname==\"${RECORD}\").ip_addresses[] | select((.address_family==4) and (.public==true)).address")"
+  if [[ -z "${IP}" ]]; then
+    echo "not ready yet" &>2
+    continue
+  fi
 
-if [[ -z "${IP}" ]]; then
-  echo "not ready yet" &>2
-  exit -1
-fi
+  RECORD=${RECORD%".${DOMAIN}"}
+  cfcli rm "${RECORD}" || true
+  cfcli add --type "A" "${RECORD}" "${IP}" --ttl 120
+done
 
-cfcli rm "${RECORD}" || true
-cfcli add --type "A" "${RECORD}" "${IP}" --ttl 120

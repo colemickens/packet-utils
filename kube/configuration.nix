@@ -8,7 +8,11 @@
 
   networking.firewall.enable = false;
 
-  environment.systemPackages = with pkgs; [ cri-tools ];
+  environment.systemPackages = with pkgs; [
+    cri-tools
+    # temporary:
+    ripgrep
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -50,10 +54,14 @@
 
   environment.noXlibs = true;
   virtualisation = {
-    # TODO: these should be "triggered" by the module+options below
-    # containerd
+    docker.enable = true;
+    # TODO:
+    # docker.useContaienerd = true;
+    # TODO: start based on the kubernetes containerRuntime option...
     containerd.enable = true;
     # kata
+    # TODO set this via the "containerd"/"crio" usage of the thing
+    # TODO: should we be using application.kata-runtime.eanble instead since theres no service?
     kata-runtime.enable = true;
   };
 

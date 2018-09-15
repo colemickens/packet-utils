@@ -6,6 +6,8 @@ set -euo pipefail
 # misc for dev only, remove later
 nix-env -iA nixos.gitAndTools.gitFull nixos.neovim nixos.htop nixos.psmisc nixos.tmux nixos.ripgrep
 
+# TODO: declarative git repo management / my other idea gitbgsync
+# TODO: prototype + blog
 if [[ ! -d /etc/nixpkgs ]]; then
   git clone https://github.com/colemickens/nixpkgs /etc/nixpkgs
   cd /etc/nixpkgs
@@ -22,12 +24,19 @@ fi
 mv /etc/nixos/configuration.nix "/etc/nixos/configuration-backup-$(date '+%s').nix"
 ln -s /etc/packet-utils/kube/configuration.nix /etc/nixos/configuration.nix
 
+# TODO: remove (or find more elegant nix-y way to import my normal nixcfg, (which should actually be not that hard)
+# TODO: would be very cool blog post, actually. totally could login as my normal user and have all of my softawre without even thinkng about it
+# TODO: demo:
+#       - docker container, with my user+config
+#       - vm, same thing
+#       etc
 cat <<EOF >/root/.gitconfig
 [user]
   email = cole.mickens@gmail.com
   name = Cole Mickens
 EOF
 
+# TODO: blog post about the azure storage for massive cheap speedup
 export NIX_PATH=nixpkgs=/etc/nixpkgs:nixos-config=/etc/nixos/configuration.nix
 nixos-rebuild switch \
   --option extra-binary-caches \

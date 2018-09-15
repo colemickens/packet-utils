@@ -1,29 +1,32 @@
 #!/usr/bin/env bash
 
+set -x
+set -euo pipefail
+
 # FOLLOW: https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md
 
-RUNTIME="io.containerd.runtime.kata.v2" # fails with: ctr: no such file or directory: not found
-#RUNTIME="io.containerd.runtime.v1.linux" # works
+crictl stopp $(crictl pods -q)
+crictl rmp $(crictl pods -q)
 
 image="docker.io/library/redis:alpine"
 
-echo<<EOF >"/tmp/pod-config.json"
+cat<<EOF >"/tmp/pod-config.json"
 {
   "metadata": {
-    "name": "nginx-sandbox",
+    "name": "redis0",
     "namespace": "default",
     "attempt": 1,
-    "uid": "hdishd83djaidwnduwk28bcsb"
+    "uid": "redis0"
   },
   "logDirectory": "/tmp",
-    "linux": {
-  }
+  "linux": {}
 }
 EOF
-echo<<EOF >"/tmp/container-config.json"
+cat<<EOF >"/tmp/container-config.json"
 {
   "metadata": {
-    "name": "redis0"
+    "name": "redis0",
+    "attempt": 2
   },
   "image":{
     "image": "docker.io/library/redis:alpine"
@@ -31,20 +34,21 @@ echo<<EOF >"/tmp/container-config.json"
   "command": [
     "top"
   ],
-  "log_path": "redis0/0.log",
-  "linux": {
-  }
+  "log_path": "redis.log",
+  "linux": {}
 }
 EOF
+# TODO: why does the relative log_path not work?
 
-podid="$(crictl runp "/tmp/pod-config.json")"
+# TODO: at this layer does it default to running the iamges command, or is the higher level expected to parse and do it?
 
 crictl pull "${image}"
 
+podid="$(crictl --debug runp "/tmp/pod-config.json")"
+
 # TODO: why is pod-config repeated, and passed by id???
-containerid="$(crictl create ${podid} /tmp/container-config.json /tmp/pod-config.json)"
+containerid="$(crictl --debug create ${podid} /tmp/container-config.json /tmp/pod-config.json)"
 
 crictl start "${containerid}"
 
-crictl exec -i -t "${containerid}" ls
-
+crictl exec -i -t "${containerid}" ls -R /

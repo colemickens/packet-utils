@@ -31,9 +31,6 @@ cat<<EOF >"/tmp/container-config.json"
   "image":{
     "image": "docker.io/library/redis:alpine"
   },
-  "command": [
-    "top"
-  ],
   "log_path": "redis.log",
   "linux": {}
 }
@@ -41,6 +38,7 @@ EOF
 # TODO: why does the relative log_path not work?
 
 # TODO: at this layer does it default to running the iamges command, or is the higher level expected to parse and do it?
+ # - yes, it will default to the image command, as we see here ( iremoed the command frm the linked guide, just to see)
 
 crictl pull "${image}"
 
@@ -50,5 +48,6 @@ podid="$(crictl --debug runp "/tmp/pod-config.json")"
 containerid="$(crictl --debug create ${podid} /tmp/container-config.json /tmp/pod-config.json)"
 
 crictl start "${containerid}"
+sleep 1
+crictl exec -i -t "${containerid}" top
 
-crictl exec -i -t "${containerid}" ls -R /

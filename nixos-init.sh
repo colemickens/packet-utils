@@ -3,6 +3,8 @@
 set -x
 set -euo pipefail
 
+echo "PLAN=${1}"
+
 # misc for dev only, remove later
 nix-env -iA nixos.gitAndTools.gitFull nixos.neovim nixos.htop nixos.psmisc nixos.tmux nixos.ripgrep
 
@@ -22,7 +24,7 @@ if [[ ! -d /etc/packet-utils ]]; then
 fi
 
 mv /etc/nixos/configuration.nix "/etc/nixos/configuration-backup-$(date '+%s').nix"
-ln -s /etc/packet-utils/kube/configuration.nix /etc/nixos/configuration.nix
+ln -s /etc/packet-utils/plans/${PLAN}/configuration.nix /etc/nixos/configuration.nix
 
 # TODO: remove (or find more elegant nix-y way to import my normal nixcfg, (which should actually be not that hard)
 # TODO: would be very cool blog post, actually. totally could login as my normal user and have all of my softawre without even thinkng about it

@@ -19,7 +19,7 @@ in
     };
     unitConfig = {
       # ensure we only run once
-      ConditionPathExists = "/var/lib/bootstrap-complete";
+      ConditionPathExists = "!/var/lib/bootstrap-complete";
     };
     wantedBy = [ "multi-user.target" ];
     wants = [ "network-online.target" ];
@@ -102,6 +102,7 @@ in
         --option trusted-public-keys \
         "nix-cache.cluster.lol-1:Pa4IudNcMNF+S/CjNt5GmD8vVJBDf8mJDktXfPb33Ak= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.nixos.org-1:CNHJZBh9K4tP3EKF6FkkgeVYsS3ohTl+oS0Qa8bezVs="
 
+      echo "done" > /var/lib/bootstrap-complete
       reboot
     '';
     };

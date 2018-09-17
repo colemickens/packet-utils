@@ -44,38 +44,31 @@ EOF
     "https://api.packet.net/projects/${PACKET_PROJECT_ID}/devices"
 }
 
+function device_id() {
+  device_list | jq -r ".[] | select(.hostname==\"${1}\").id"
+}
+
 function device_update() {
-  DEVICE_ID="$(device_list | jq -r ".[] | select(.hostname==\"${1}\").id")"
   c \
     -X PUT \
     -H "Content-Type: application/json" \
     -d "${1}" \
-    "https://api.packet.net/devices/${DEVICE_ID}/"
+    "https://api.packet.net/devices/$(device_id ${1})/"
 }
 
 function device_events() {
-  set -x
-  DEVICE_ID="$(device_list | jq -r ".[] | select(.hostname==\"${1}\").id")"
-  c \
-    "https://api.packet.net/devices/${DEVICE_ID}/events" \
-      | jq -r '.events'
-}
-
-function device_sos() {
-  true # TODO
+  c "https://api.packet.net/devices/$(device_id ${1})/events" | jq -r '.events'
 }
 
 function device_delete() {
-  c \
-    -X DELETE \
-    "https://api.packet.net/devices/${1}"
+  c -X DELETE "https://api.packet.net/devices/$(device_id ${1})"
 }
 
 
 function device_delete_all() {
   DEVICES=$(device_list | jq -r '.[].id')
   for d in ${DEVICES}; do
-    device_delete "${d}"
+    c -X DELETE "https://api.packet.net/devices/${d}"
   done
 }
 

@@ -23,19 +23,26 @@ function az() {
       docker.io/microsoft/azure-cli az $@
 }
 
-if az storage container show --name nixcache; then
-  az storage container delete --name nixcache
-  sleep 60
+# only to clean?
+#if az storage container show --name nixcache; then
+#  az storage container delete --name nixcache
+#  sleep 60
+#fi
+
+if [[ ! az storage container show --name nixcache ]]; then
+  az storage container create --help
+
+  az storage container create \
+    --name nixcache \
+    --public-access container
 fi
 
-az storage container create --help
+az storage blob list > list.txt
+echo list.txt
+#filter
 
-az storage container create \
-  --name nixcache \
-  --public-access container
-
+exit 0
 time az storage blob upload-batch \
-  --if-none-match '\*' \
   --source /nixcache \
   --destination nixcache \
 

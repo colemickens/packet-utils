@@ -28,23 +28,23 @@ in
   };
   
 
-#  nix = {
-#    trustedBinaryCaches = [
-#      https://kixstorage.blob.core.windows.net/nixcache
-#      https://cache.nixos.org
-#      https://hydra.nixos.org
-#    ];
-#    binaryCachePublicKeys = [
-#      "nix-cache.cluster.lol-1:Pa4IudNcMNF+S/CjNt5GmD8vVJBDf8mJDktXfPb33Ak="
-#      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-#      "hydra.nixos.org-1:CNHJZBh9K4tP3EKF6FkkgeVYsS3ohTl+oS0Qa8bezVs="
-#    ];
-#    nixPath = [
-#      "/etc/nixos"
-#      "nixpkgs=/etc/nixpkgs"
-#      "nixos-config=/etc/nixos/configuration.nix"
-#    ];
-#  };
+  nix = {
+    trustedBinaryCaches = [
+      https://kixstorage.blob.core.windows.net/nixcache
+      https://cache.nixos.org
+      https://hydra.nixos.org
+    ];
+    binaryCachePublicKeys = [
+      "nix-cache.cluster.lol-1:Pa4IudNcMNF+S/CjNt5GmD8vVJBDf8mJDktXfPb33Ak="
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "hydra.nixos.org-1:CNHJZBh9K4tP3EKF6FkkgeVYsS3ohTl+oS0Qa8bezVs="
+    ];
+    nixPath = [
+      "/etc/nixos"
+      "nixpkgs=/etc/nixpkgs"
+      "nixos-config=/etc/nixos/configuration.nix"
+    ];
+  };
 
   environment.etc."bootstrap-nixos.sh"= {
     mode = "0755";
@@ -97,7 +97,7 @@ in
       export NIX_PATH=nixpkgs=/etc/nixpkgs:nixos-config=/etc/nixos/configuration.nix
       export NIXOSRB="$(nix-instantiate --eval -E '<nixpkgs>')/nixos/modules/installer/tools/nixos-rebuild.sh"
       export NIXOSRB="$(nix-build --no-out-link --expr 'with import <nixpkgs/nixos> {}; config.system.build.nixos-rebuild')/bin/nixos-rebuild";
-      "''${NIXOSRB}" switch \
+      "''${NIXOSRB}" boot \
         --option extra-binary-caches \
         "https://kixstorage.blob.core.windows.net/nixcache https://cache.nixos.org https://hydra.nixos.org" \
         --option trusted-public-keys \

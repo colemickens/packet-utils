@@ -16,27 +16,34 @@ in
      Type = "simple";
      ExecStart = "/etc/bootstrap-nixos.sh";
      Restart = "on-failure";
-   };
-   wantedBy = [ "multi-user.target" ];
+    };
+    unitConfig = {
+      # ensure we only run once
+      ConditionPathExists = "/var/lib/bootstrap-complete";
+    };
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
   };
+  
 
-  nix = {
-    trustedBinaryCaches = [
-      https://kixstorage.blob.core.windows.net/nixcache
-      https://cache.nixos.org
-      https://hydra.nixos.org
-    ];
-    binaryCachePublicKeys = [
-      "nix-cache.cluster.lol-1:Pa4IudNcMNF+S/CjNt5GmD8vVJBDf8mJDktXfPb33Ak="
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "hydra.nixos.org-1:CNHJZBh9K4tP3EKF6FkkgeVYsS3ohTl+oS0Qa8bezVs="
-    ];
-    nixPath = [
-      "/etc/nixos"
-      "nixpkgs=/etc/nixpkgs"
-      "nixos-config=/etc/nixos/configuration.nix"
-    ];
-  };
+#  nix = {
+#    trustedBinaryCaches = [
+#      https://kixstorage.blob.core.windows.net/nixcache
+#      https://cache.nixos.org
+#      https://hydra.nixos.org
+#    ];
+#    binaryCachePublicKeys = [
+#      "nix-cache.cluster.lol-1:Pa4IudNcMNF+S/CjNt5GmD8vVJBDf8mJDktXfPb33Ak="
+#      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+#      "hydra.nixos.org-1:CNHJZBh9K4tP3EKF6FkkgeVYsS3ohTl+oS0Qa8bezVs="
+#    ];
+#    nixPath = [
+#      "/etc/nixos"
+#      "nixpkgs=/etc/nixpkgs"
+#      "nixos-config=/etc/nixos/configuration.nix"
+#    ];
+#  };
 
   environment.etc."bootstrap-nixos.sh"= {
     mode = "0755";
@@ -44,6 +51,12 @@ in
       #!/usr/bin/env bash
       set -x
       set -euo pipefail
+
+      # TODO: ugly spof, 
+      until $(curl --output /dev/null --silent --head --fail https://cache.nixos.org); do
+        printf '.'
+        sleep 5
+      done
 
       # misc for dev only, remove later
       # TODO: declarative git repo management / my other idea gitbgsync

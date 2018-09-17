@@ -9,6 +9,7 @@ in
     description = "NixOS Bootstrap";
     path = with pkgs; [
       bash
+      curl
       gitAndTools.gitFull
       nix
     ];

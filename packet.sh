@@ -16,10 +16,13 @@ function device_list() {
 
 function device_create() {
   HOURS="${HOURS}"
-  export TERMINATION_TIME="${TERMINATION_TIME:-"$(TZ=UTC date --date='+${HOURS} hour' --iso-8601=seconds)"}"
+  export TERMINATION_TIME="${TERMINATION_TIME:-"$(TZ=UTC date --date="+${HOURS} hour" --iso-8601=seconds)"}"
 
   if [ "${TYPE:-"spot"}" == "spot" ]; then
-    spot="\"spot_instance\": true, \"spot_price_max\": ${SPOT_PRICE_MAX}"
+    extra="${extra:-},\"spot_instance\": true, \"spot_price_max\": ${SPOT_PRICE_MAX}"
+  fi
+  if [[ ! -z "${INIT:-}" ]]; then
+    extra="${extra:-},\"userdata\": $(jq -Rs . <${INIT})"
   fi
 
   export dev=$(cat <<EOF
@@ -28,11 +31,12 @@ function device_create() {
     "plan": "${PLAN}",
     "operating_system": "nixos_18_03",
     "hostname": "${1}",
-    "termination_time": "${TERMINATION_TIME}",
-    ${spot}
+    "termination_time": "${TERMINATION_TIME}"
+   ${extra:-}
   }
 EOF
 )
+  echo "${dev}" > /tmp/dev.txt
 
   c \
     -H "Content-Type: application/json" \
@@ -50,18 +54,20 @@ function device_update() {
 }
 
 function device_events() {
+  set -x
   DEVICE_ID="$(device_list | jq -r ".[] | select(.hostname==\"${1}\").id")"
   c \
     "https://api.packet.net/devices/${DEVICE_ID}/events" \
       | jq -r '.events'
 }
 
+function device_sos() {
+  true # TODO
+}
 
 function device_delete() {
   c \
     -X DELETE \
-    -H "Content-Type: application/json" \
-    -d "${1}" \
     "https://api.packet.net/devices/${1}"
 }
 
@@ -69,7 +75,7 @@ function device_delete() {
 function device_delete_all() {
   DEVICES=$(device_list | jq -r '.[].id')
   for d in ${DEVICES}; do
-    ./lib/packet.sh device_delete "${d}"
+    device_delete "${d}"
   done
 }
 

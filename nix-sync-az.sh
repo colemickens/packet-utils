@@ -19,7 +19,8 @@ function az() {
   docker run \
     --net=host \
     --env AZURE_STORAGE_CONNECTION_STRING="${azkey}" \
-    --volume "/tmp/nixcache:/nixcache:ro" \
+    --volume "/tmp/nixcache:/tmp/nixcache:ro" \
+    --volume "/tmp/nixcache-upload:/tmp/nixcache-upload:ro" \
       docker.io/microsoft/azure-cli az $@
 }
 
@@ -29,7 +30,7 @@ function az() {
 #  sleep 60
 #fi
 
-if [[ ! az storage container show --name nixcache ]]; then
+if ! az storage container show --name nixcache ; then
   az storage container create --help
 
   az storage container create \
@@ -37,12 +38,15 @@ if [[ ! az storage container show --name nixcache ]]; then
     --public-access container
 fi
 
-az storage blob list > list.txt
-echo list.txt
-#filter
+rm -rf /tmp/nixcache-upload
+mkdir -p /tmp/nixcache-upload
+cd /tmp/nixcache
+az storage blob list --container-name nixcache -o tsv | cut -f4 > .rgignore
+rg -l . | while read -r a; do ln -s /tmp/nixcache/$a /tmp/nixcache-upload/$a; done
 
-exit 0
 time az storage blob upload-batch \
-  --source /nixcache \
+  --source /tmp/nixcache-upload \
   --destination nixcache \
+
+rm -rf /tmp/nixcache-upload
 

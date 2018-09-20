@@ -48,6 +48,15 @@ function device_id() {
   device_list | jq -r ".[] | select(.hostname==\"${1}\").id"
 }
 
+function device_get() {
+  device_list | jq -r ".[] | select(.hostname==\"${1}\")"
+}
+
+function device_sos() {
+  host="$(device_get "${1}" | jq -r '. | "\(.id)@sos.\(.facility.code).packet.net"')"
+  ssh "root@${host}"
+}
+
 function device_update() {
   c \
     -X PUT \

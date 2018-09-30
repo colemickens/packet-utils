@@ -3,5 +3,5 @@
 set -euo pipefail
 
 target="${1}"
-rsync -avzh /etc/nixos/secrets root@${target}:/etc/nixos/secrets
+rsync -avzh /etc/nixos/secrets/ root@${target}:/etc/nixos/secrets
 

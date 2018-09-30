@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+export PACKET_API_TOKEN="${PACKET_API_TOKEN:-"$(cat /etc/nixos/secrets/packet-apitoken)"}"
+export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(cat /etc/nixos/secrets/packet-projectid)"}"
+
 function c() {
   curl -H "X-Auth-Token: ${PACKET_API_TOKEN}" "$@"
 }
@@ -36,8 +39,7 @@ function device_create() {
   }
 EOF
 )
-  echo "${dev}" > /tmp/dev.txt
-
+echo ${dev}
   c \
     -H "Content-Type: application/json" \
     -d "${dev}" \
@@ -45,23 +47,31 @@ EOF
 }
 
 function device_id() {
-  device_list | jq -r ".[] | select(.hostname==\"${1}\").id"
+  device_list | jq -r "[.[] | select(.hostname==\"${1}\").id][0]"
 }
 
 function device_get() {
-  device_list | jq -r ".[] | select(.hostname==\"${1}\")"
+  device_list | jq -r "[.[] | select(.hostname==\"${1}\")][0]"
 }
 
 function device_sos() {
-  host="$(device_get "${1}" | jq -r '. | "\(.id)@sos.\(.facility.code).packet.net"')"
-  ssh "root@${host}"
+  ssh "$(device_get "${1}" | jq -r '. | "\(.id)@sos.\(.facility.code).packet.net"')"
 }
+
+function device_termination_time() {
+  t="$(device_get "${1}" | jq -r '.termination_time')"
+  now="$(date '+%s')"
+  later="$(date -d "${t}" '+%s')"
+  seconds="$((${later} - ${now}))"
+  echo $((seconds/86400))d$(date -d "1970-01-01 + $seconds seconds" "+%H:%M:%S")
+}
+
 
 function device_update() {
   c \
     -X PUT \
     -H "Content-Type: application/json" \
-    -d "${1}" \
+    -d "$(cat ${2})" \
     "https://api.packet.net/devices/$(device_id ${1})/"
 }
 
@@ -72,7 +82,6 @@ function device_events() {
 function device_delete() {
   c -X DELETE "https://api.packet.net/devices/$(device_id ${1})"
 }
-
 
 function device_delete_all() {
   DEVICES=$(device_list | jq -r '.[].id')

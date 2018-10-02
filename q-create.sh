@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-FACILITY=sjc1 \
+FACILITY=ewr1 \
 PLAN="c2.medium.x86" \
 HOURS=12 \
 SPOT_PRICE_MAX=0.2 \

@@ -3,6 +3,8 @@
 export PACKET_API_TOKEN="${PACKET_API_TOKEN:-"$(cat /etc/nixos/secrets/packet-apitoken)"}"
 export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(cat /etc/nixos/secrets/packet-projectid)"}"
 
+export PACKET_DEFAULT_DEVICE="kix.cluster.lol"
+
 function c() {
   curl -H "X-Auth-Token: ${PACKET_API_TOKEN}" "$@"
 }
@@ -47,19 +49,23 @@ echo ${dev}
 }
 
 function device_id() {
-  device_list | jq -r "[.[] | select(.hostname==\"${1}\").id][0]"
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  device_list | jq -r "[.[] | select(.hostname==\"${DEVICE}\").id][0]"
 }
 
 function device_get() {
-  device_list | jq -r "[.[] | select(.hostname==\"${1}\")][0]"
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  device_list | jq -r "[.[] | select(.hostname==\"${DEVICE}\")][0]"
 }
 
 function device_sos() {
-  ssh "$(device_get "${1}" | jq -r '. | "\(.id)@sos.\(.facility.code).packet.net"')"
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  ssh "$(device_get "${DEVICE}" | jq -r '. | "\(.id)@sos.\(.facility.code).packet.net"')"
 }
 
 function device_termination_time() {
-  t="$(device_get "${1}" | jq -r '.termination_time')"
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  t="$(device_get "${DEVICE}" | jq -r '.termination_time')"
   now="$(date '+%s')"
   later="$(date -d "${t}" '+%s')"
   seconds="$((${later} - ${now}))"
@@ -68,19 +74,22 @@ function device_termination_time() {
 
 
 function device_update() {
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
   c \
     -X PUT \
     -H "Content-Type: application/json" \
     -d "$(cat ${2})" \
-    "https://api.packet.net/devices/$(device_id ${1})/"
+    "https://api.packet.net/devices/$(device_id ${DEVICE})/"
 }
 
 function device_events() {
-  c "https://api.packet.net/devices/$(device_id ${1})/events" | jq -r '.events'
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  c "https://api.packet.net/devices/$(device_id ${DEVICE})/events" | jq -r '.events'
 }
 
 function device_delete() {
-  c -X DELETE "https://api.packet.net/devices/$(device_id ${1})"
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  c -X DELETE "https://api.packet.net/devices/$(device_id ${DEVICE})"
 }
 
 function device_delete_all() {

@@ -14,6 +14,16 @@ FACILITY=sjc1 \
 PLAN="c2.medium.x86" \
 HOURS=12 \
 SPOT_PRICE_MAX=0.21 \
-INIT=/etc/nixcfg/utils/bootstrap-configuration.nix \
+INIT=/etc/nixcfg/utils/bootstrap.nix \
   ./packet.sh device_create "${NAME:-"kix.cluster.lol"}"
+
+# wait 2 minutes, update dns
+sleep $(( 60 * 2))
+./update-cf.sh
+
+# wait 10 minutes, try to copy secrets
+sleep $(( 60 * 10 ))
+until ./copy-secrets.sh; do
+  sleep 30
+done
 

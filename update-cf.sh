@@ -21,7 +21,7 @@ for RECORD in ${DEVICE_HOSTNAMES}; do
   echo "----------------------------------------------------------------------------"
   IP="$(echo "${DEVICES_OUT}" | jq -r ".[] | select(.hostname==\"${RECORD}\").ip_addresses[] | select((.address_family==4) and (.public==true)).address")"
   if [[ -z "${IP}" ]]; then
-    echo "not ready yet" &>2
+    echo "not ready yet"
     continue
   fi
 

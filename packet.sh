@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 export PACKET_API_TOKEN="${PACKET_API_TOKEN:-"$(cat /etc/nixos/secrets/packet-apitoken)"}"
 export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(cat /etc/nixos/secrets/packet-projectid)"}"
@@ -56,6 +57,17 @@ function device_id() {
 function device_get() {
   DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
   device_list | jq -r "[.[] | select(.hostname==\"${DEVICE}\")][0]"
+}
+
+function device_sos_log() {
+  DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  ADDR="$(device_get "${DEVICE}" | jq -r '. | "\(.id)@sos.\(.facility.code).packet.net"')"
+  echo "" > /tmp/packet.log
+  while true; do
+    echo "<<<<<<<<<<<<<<<reconnect>>>>>>>>>>>>>>>" > /tmp/packet.log
+    ssh "${ADDR}" > /tmp/packet.log || true
+    sleep 1
+  done
 }
 
 function device_sos() {

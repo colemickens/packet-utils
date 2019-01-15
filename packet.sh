@@ -72,7 +72,9 @@ function device_sos_log() {
 
 function device_sos() {
   DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
+  set -x
   ssh "$(device_get "${DEVICE}" | jq -r '. | "\(.id)@sos.\(.facility.code).packet.net"')"
+  set +x
 }
 
 function device_termination_time() {

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set -x
+
+CACHE_PTH="/tmp/localstore/"
+CACHE_STORE="file://${CACHE_PTH}"
+
+mkdir -p ${CACHE_PTH}
+export NIX_REMOTE="ssh-ng://root@kix.cluster.lol"
+
+# capture all the built paths
+builtPaths="$(nix-build "${@}")"
+
+# foreach built path, copy it to the "cache-store" on remote
+echo "${builtPaths}" | while read -r pth1; do
+  ssh root@kix.cluster.lol \
+    nix copy "${pth1}" --to "${CACHE_STORE}"
+done
+
+# sync "cache-store" to local machine
+rsync -hivaz --progress "root@kix.cluster.lol:${CACHE_PTH}" "${CACHE_PTH}"
+
+# import all from our local cache thing
+unset NIX_REMOTE
+
+# BUG: NOT WORKING: complains 'path not valid' for unsigned(?) paths:
+#nix copy --from "${CACHE_STORE}" --all --no-check-sigs
+# BUG: should be the same thing:
+#exit 0
+cd "${CACHE_PTH}"
+for f1 in *.narinfo; do
+  echo "${f1}"
+  f2="$(cat "${f1}" | grep StorePath | cut -d' ' -f2)"
+  echo "****${f2}***"
+  nix copy --from "${CACHE_STORE}" ${f2} --no-check-sigs
+done
+

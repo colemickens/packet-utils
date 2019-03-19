@@ -20,6 +20,6 @@ MACHINENAME="pkt-$(printf "%x" "$(date '+%s')")"
 FACILITY=sjc1 \
 PLAN="x2.xlarge.x86" \
 OS="ubuntu_18_04" \
-SPOT_PRICE_MAX=0.1 \
+SPOT_PRICE_MAX=0.15 \
   ./packet.sh device_create "${MACHINENAME}"
 

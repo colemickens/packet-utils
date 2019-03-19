@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export PACKET_API_TOKEN="${PACKET_API_TOKEN:-"$(cat /etc/nixos/secrets/packet-apitoken)"}"
-export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(cat /etc/nixos/secrets/packet-projectid)"}"
+export PACKET_API_TOKEN="${PACKET_API_TOKEN:-"$(cat $HOME/.secrets/packet-apitoken)"}"
+export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(cat $HOME/.secrets/packet-projectid)"}"
 
 export PACKET_DEFAULT_DEVICE="kix.cluster.lol"
 
@@ -21,9 +21,12 @@ function device_list() {
 }
 
 function device_create() {
-  HOURS="${HOURS}"
-  export TERMINATION_TIME="${TERMINATION_TIME:-"$(TZ=UTC date --date="+${HOURS} hour" --iso-8601=seconds)"}"
-
+  set -x
+  if [ "${HOURS:-""}" != "" ]; then
+    HOURS="${HOURS}"
+    export TERMINATION_TIME="${TERMINATION_TIME:-"$(TZ=UTC date --date="+${HOURS} hour" --iso-8601=seconds)"}"
+    extra="${extra:-},\"termination_time\": ${TERMINATION_TIME}"
+  fi
   if [ "${TYPE:-"spot"}" == "spot" ]; then
     extra="${extra:-},\"spot_instance\": true, \"spot_price_max\": ${SPOT_PRICE_MAX}"
   fi
@@ -35,9 +38,8 @@ function device_create() {
   {
     "facility": "${FACILITY}",
     "plan": "${PLAN}",
-    "operating_system": "nixos_18_03",
-    "hostname": "${1}",
-    "termination_time": "${TERMINATION_TIME}"
+    "operating_system": "${OS:-"nixos_18_03"}",
+    "hostname": "${1}"
    ${extra:-}
   }
 EOF

@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#FACILITY=ewr1 \
-#FACILITY=nrt1 \
-#FACILITY=sjc1 \
-#FACILITY=ams1 \
+#export FACILITY=asm1
+#export FACILITY=ewr1
+#export FACILITY=nrt1
+export FACILITY=sjc1
 
-#PLAN="c2.medium.x86" \
-#PLAN="m2.xlarge.x86" \
-#PLAN="x2.xlarge.x86" \
+#export PLAN="c2.medium.x86"
+#export PLAN="m2.xlarge.x86"
+export PLAN="x2.xlarge.x86"
 
-#SPOT_PRICE_MAX=0.2 \
-#SPOT_PRICE_MAX=0.4 \
+export SPOT_PRICE_MAX=0.50
+export HOURS=4
 
-MACHINENAME="pkt-$(printf "%x" "$(date '+%s')")"
+export MACHINENAME="pkt-$(printf "%x" "$(date '+%s')")"
 
-#HOURS=10 \
+export OS="nixos_19_03"
 
-FACILITY=sjc1 \
-PLAN="x2.xlarge.x86" \
-OS="ubuntu_18_04" \
-SPOT_PRICE_MAX=0.15 \
-  ./packet.sh device_create "${MACHINENAME}"
+./packet.sh device_create "${MACHINENAME}"
 

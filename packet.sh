@@ -25,7 +25,7 @@ function device_create() {
   if [ "${HOURS:-""}" != "" ]; then
     HOURS="${HOURS}"
     export TERMINATION_TIME="${TERMINATION_TIME:-"$(TZ=UTC date --date="+${HOURS} hour" --iso-8601=seconds)"}"
-    extra="${extra:-},\"termination_time\": ${TERMINATION_TIME}"
+    extra="${extra:-},\"termination_time\": \"${TERMINATION_TIME}\""
   fi
   if [ "${TYPE:-"spot"}" == "spot" ]; then
     extra="${extra:-},\"spot_instance\": true, \"spot_price_max\": ${SPOT_PRICE_MAX}"
@@ -82,6 +82,10 @@ function device_sos() {
 function device_termination_time() {
   DEVICE="${1:-"${PACKET_DEFAULT_DEVICE}"}"
   t="$(device_get "${DEVICE}" | jq -r '.termination_time')"
+  if [[ "${t}" == "null" ]]; then 
+    printf "∞"
+    return
+  fi
   now="$(date '+%s')"
   later="$(date -d "${t}" '+%s')"
   seconds="$((${later} - ${now}))"

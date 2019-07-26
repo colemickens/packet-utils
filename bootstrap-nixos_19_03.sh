@@ -20,6 +20,7 @@ IP="${1}"
 
 CONFIG_HOME="/root"
 CODE_HOME="/home/cole"
+ssh-keyscan -H "${IP}" >> "${HOME}/.ssh/known_hosts"
 ssh "root@${IP}" "mkdir -p ${CONFIG_HOME}/.config/cachix"
 ssh "root@${IP}" "mkdir -p ${CONFIG_HOME}/.config/nixpkgs/"
 scp "${HOME}/.config/cachix/cachix.dhall" "root@${IP}:${CONFIG_HOME}/.config/cachix/"

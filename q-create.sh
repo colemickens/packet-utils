@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 
 #export FACILITY=asm1
 #export FACILITY=ewr1
@@ -19,3 +20,11 @@ export OS="nixos_19_03"
 
 ./packet.sh device_create "${MACHINENAME}"
 
+IP="$(./packet.sh device_list | jq -r ".[] | select(.hostname==\"${MACHINENAME}\").ip_addresses[] | select((.address_family==4) and (.public==true)).address")"
+
+while true; do
+  if ./bootstrap-nixos_19_03.sh "${IP}"; then
+    break
+  fi
+  sleep 10
+done

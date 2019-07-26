@@ -24,7 +24,7 @@ ssh "root@${IP}" "mkdir -p ${CONFIG_HOME}/.config/cachix"
 ssh "root@${IP}" "mkdir -p ${CONFIG_HOME}/.config/nixpkgs/"
 scp "${HOME}/.config/cachix/cachix.dhall" "root@${IP}:${CONFIG_HOME}/.config/cachix/"
 
-ssh "root@${IP}"<<EEOOFF
+ssh -A "root@${IP}"<<EEOOFF
 cat<<EOF | sudo bash
     set -x
     set -e
@@ -34,19 +34,42 @@ cat<<EOF | sudo bash
 
     nix-channel --add https://nixos.org/channels/nixos-19.03 nixos
     nix-channel --update
-    nix-env -iA nixos.git -iA nixos.cachix -iA nixos.tmux -iA nixos.jq
+    nix-env \
+        -iA nixos.git \
+        -iA nixos.cachix \
+        -iA nixos.tmux \
+        -iA nixos.mosh \
+        -iA nixos.jq \
+        -iA nixos.ripgrep \
+        -iA nixos.neovim
+
+    git config --global user.name "Cole Mickens"
+    git config --global user.email "cole.mickens@gmail.com"
 
     cachix use nixpkgs-wayland
     cachix use colemickens
 
     mkdir -p ${CODE_HOME}/code/overlays
 
-    git clone https://github.com/colemickens/nixcfg ${CODE_HOME}/code/nixcfg
-    git clone https://github.com/colemickens/nixpkgs-wayland ${CODE_HOME}/code/overlays/nixpkgs-wayland
-    git clone https://github.com/colemickens/nixpkgs ${CODE_HOME}/code/nixpkgs -b cmpkgs
+    export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    git clone git@github.com:colemickens/nixcfg ${CODE_HOME}/code/nixcfg
+    git clone git@github.com:colemickens/nixpkgs-wayland ${CODE_HOME}/code/overlays/nixpkgs-wayland
+    git clone git@github.com:colemickens/nixpkgs ${CODE_HOME}/code/nixpkgs -b cmpkgs
+    (cd ${CODE_HOME}/code/nixpkgs;
+     git remote add nixpkgs https://github.com/nixos/nixpkgs;
+     git remote add nixpkgs-channels https://github.com/nixos/nixpkgs-channels;
+     git remote update
+    )
+
+    set +e
+
+    cd ${CODE_HOME}/code/overlays/nixpkgs-wayland
+    ./update.sh
 
     cd ${CODE_HOME}/code/nixcfg
     ./update.sh
+
+    echo "TODO: call Packet to shut down this instance!"
 EOF
 EEOOFF
 

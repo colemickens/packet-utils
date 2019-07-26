@@ -7,7 +7,7 @@ export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(cat $HOME/.secrets/packet-proj
 export PACKET_DEFAULT_DEVICE="kix.cluster.lol"
 
 function c() {
-  curl -H "X-Auth-Token: ${PACKET_API_TOKEN}" "$@"
+  curl -H "X-Auth-Token: ${PACKET_API_TOKEN}" "$@" 2>/dev/null
 }
 
 function spot_prices() {

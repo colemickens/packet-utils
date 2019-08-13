@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 
 # ssh root@${PIP}
 #   adduser cole
@@ -13,14 +14,15 @@ set -euo pipefail
 # meant to be run on a new nix_19_03 machine on packet
 # this will load my nixpkgs/nixcfg and build/switch to it
 IP="${1}"
-
-##
-# need to make my user trusted!
-##
-
 CONFIG_HOME="/root"
 CODE_HOME="/home/cole"
-ssh-keyscan -H "${IP}" >> "${HOME}/.ssh/known_hosts"
+
+# TODO: there must be a cleaner way. other attempts have failed...
+keys="$(ssh-keyscan -H "${IP}")"
+if [[ "$(echo "${keys}" | wc -c)" -lte 0 ]]; then exit -1; fi
+echo "${keys}" >> "${HOME}/.ssh/known_hosts"
+
+# now we can connect automatically (hopefully?)
 ssh "root@${IP}" "mkdir -p ${CONFIG_HOME}/.config/cachix"
 ssh "root@${IP}" "mkdir -p ${CONFIG_HOME}/.config/nixpkgs/"
 scp "${HOME}/.config/cachix/cachix.dhall" "root@${IP}:${CONFIG_HOME}/.config/cachix/"

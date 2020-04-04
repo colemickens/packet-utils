@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export PACKET_API_TOKEN="${PACKET_API_TOKEN:-"$(cat $HOME/.secrets/packet-apitoken)"}"
-export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(cat $HOME/.secrets/packet-projectid)"}"
-
-export PACKET_DEFAULT_DEVICE="kix.cluster.lol"
+export PACKET_API_TOKEN="${PACKET_API_TOKEN:-"$(gopass show 'colemickens/packet.net' | grep apikey | cut -d' ' -f2)"}"
+export PACKET_PROJECT_ID="${PACKET_PROJECT_ID:-"$(gopass show 'colemickens/packet.net' | grep default_project_id | cut -d' ' -f2)"}"
 
 function c() {
   curl -H "X-Auth-Token: ${PACKET_API_TOKEN}" "$@" 2>/dev/null
